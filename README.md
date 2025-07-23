@@ -62,3 +62,6 @@ To run HexaBank, use Docker and Docker Compose. Make sure Docker Desktop is inst
    ```bash
    docker-compose down
    ```
+
+
+<img width="1024" height="1536" alt="ChatGPT Image Jul 23, 2025, 08_13_51 PM" src="https://github.com/user-attachments/assets/aa224d0e-34d6-416a-bd68-752646af83a0" />
