@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	fraudclient "hexabank/services/payment/adapters/fraud-client"
 	"hexabank/services/payment/adapters/http"
 	"hexabank/services/payment/adapters/postgres"
 	"hexabank/services/payment/domain/service"
@@ -20,8 +21,13 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	fraudClient, err := fraudclient.NewFraudClient(os.Getenv("FRAUD_SERVICE_ADDRESS"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	paymentRepository := postgres.NewPaymentRepo(db)
-	paymentService := service.NewPaymentService(paymentRepository)
+	paymentService := service.NewPaymentService(paymentRepository, fraudClient)
 	paymentHandler := http.NewPaymentHTTP(paymentService)
 
 	r := gin.Default()
