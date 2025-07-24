@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"hexabank/payment/domain/port"
-	"hexabank/payment/errors"
+	"hexabank/internal/errors"
+	"hexabank/services/payment/domain/port"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

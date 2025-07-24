@@ -1,8 +1,8 @@
 services:
   payment:
     build:
-      context: ./services/payment
-      dockerfile: ./cmd/Dockerfile
+      context: .
+      dockerfile: ./services/payment/cmd/Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -34,3 +34,10 @@ services:
       - ./services/payment/migrations:/migrations
     depends_on:
       - payment-db
+
+  fraud:
+    build:
+      context: .
+      dockerfile: ./services/fraud/cmd/Dockerfile
+    ports:
+      - "50052:50052"

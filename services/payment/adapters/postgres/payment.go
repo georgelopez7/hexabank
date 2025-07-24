@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"hexabank/payment/domain/model"
-	"hexabank/payment/errors"
+	"hexabank/internal/errors"
+	"hexabank/services/payment/domain/model"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"

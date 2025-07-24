@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"hexabank/payment/adapters/http"
-	"hexabank/payment/adapters/postgres"
-	"hexabank/payment/domain/service"
+	"hexabank/services/payment/adapters/http"
+	"hexabank/services/payment/adapters/postgres"
+	"hexabank/services/payment/domain/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"

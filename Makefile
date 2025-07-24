@@ -18,3 +18,13 @@ db-migrate:
 # Example: "make db-rollback-last-migration"
 db-rollback-last-migration:
 	goose -dir=$(PATH_TO_DB_MIGRATIONS) postgres $(POSTGRES_DB_URL) down
+
+# -----
+# 📡 GRPC PROTOBUFS
+SERVICE ?= "fraud"
+PROTO_PATH = "api/proto/$(SERVICE)/$(SERVICE).proto"
+
+## Generates protobufs for the service
+# Example: "make gen-protobufs SERVICE=fraud"
+gen-protobufs:
+	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative $(PROTO_PATH)

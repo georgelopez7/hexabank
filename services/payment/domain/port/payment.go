@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 
-	"hexabank/payment/domain/model"
+	"hexabank/services/payment/domain/model"
 
 	"github.com/google/uuid"
 )
