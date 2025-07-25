@@ -2,7 +2,7 @@ services:
   payment:
     build:
       context: .
-      dockerfile: ./services/payment/cmd/Dockerfile
+      dockerfile: ./services/payment/Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -32,13 +32,13 @@ services:
       - GOOSE_DRIVER=postgres
       - GOOSE_DBSTRING=host=payment-db port=5432 user=user password=password dbname=hexabank
     volumes:
-      - ./services/payment/migrations:/migrations
+      - ./services/payment/adapters/postgres/migrations:/migrations
     depends_on:
       - payment-db
 
   fraud:
     build:
       context: .
-      dockerfile: ./services/fraud/cmd/Dockerfile
+      dockerfile: ./services/fraud/Dockerfile
     ports:
       - "50052:50052"

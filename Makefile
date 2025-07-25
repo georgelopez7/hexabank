@@ -2,10 +2,10 @@
 # 🐘 MIGRATIONS
 
 POSTGRES_DB_URL ?= "postgres://user:password@localhost:5432/db"
-PATH_TO_DB_MIGRATIONS = "./services/payment/migrations"
+PATH_TO_DB_MIGRATIONS = "./services/payment/adapters/postgres/migrations"
 
 ## Creates a database migration file
-# Example: "make db-create-migration MIGRATION_NAME=add_puzzles_table"
+# Example: "make db-create-migration MIGRATION_NAME=add_new_table"
 db-create-migration:
 	goose -dir=$(PATH_TO_DB_MIGRATIONS) postgres $(POSTGRES_DB_URL) create $(MIGRATION_NAME) sql
 
