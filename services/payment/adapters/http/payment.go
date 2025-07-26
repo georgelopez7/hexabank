@@ -44,6 +44,7 @@ func (h *PaymentHTTP) CreatePaymentHandler(c *gin.Context) {
 
 	description := payload.Description
 	amount := payload.Amount
+
 	paymentRecord, err := h.paymentService.CreatePayment(context.Background(), description, amount)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to fullfil payment", "error": err.Error()})

@@ -1,22 +1,36 @@
 package main
 
 import (
+	"context"
 	"hexabank/api/proto/fraud"
+	"hexabank/internal/observability/tracing"
 	"hexabank/services/fraud/adapters/grpc"
 	"hexabank/services/fraud/domain/service"
 	"log"
 	"net"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	g "google.golang.org/grpc"
 )
 
 func main() {
+	// TRACING
+	tracerName := "fraud-service"
+	shutdown := tracing.NewTracer(tracerName)
+	defer func() {
+		if err := shutdown(context.Background()); err != nil {
+			log.Fatalf("Failed to shut down tracer: %v", err)
+		}
+	}()
+
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	server := g.NewServer()
+	server := g.NewServer(
+		g.StatsHandler(otelgrpc.NewServerHandler()),
+	)
 	fraudService := &service.FraudService{}
 	fraudGRPC := grpc.NewFraudGRPC(fraudService)
 	fraud.RegisterFraudServiceServer(server, fraudGRPC)

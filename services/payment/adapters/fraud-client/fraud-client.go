@@ -5,6 +5,7 @@ import (
 	"hexabank/api/proto/fraud"
 	"hexabank/services/payment/domain/model"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -16,6 +17,7 @@ type FraudClient struct {
 func NewFraudClient(address string) (*FraudClient, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()), // IMPORTANT: PROPAGATE TRACE CONTEXT
 	}
 
 	conn, err := grpc.NewClient(address, opts...)

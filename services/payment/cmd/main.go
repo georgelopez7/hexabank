@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
+	"hexabank/internal/observability/tracing"
 	fraudclient "hexabank/services/payment/adapters/fraud-client"
 	"hexabank/services/payment/adapters/http"
 	"hexabank/services/payment/adapters/postgres"
@@ -16,16 +18,28 @@ import (
 )
 
 func main() {
+	// POSTGRES
 	db, err := sqlx.Connect("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	// TRACING
+	tracerName := "payment-service"
+	shutdown := tracing.NewTracer(tracerName)
+	defer func() {
+		if err := shutdown(context.Background()); err != nil {
+			log.Fatalf("Failed to shut down tracer: %v", err)
+		}
+	}()
+
+	// FRAUD CLIENT
 	fraudClient, err := fraudclient.NewFraudClient(os.Getenv("FRAUD_SERVICE_ADDRESS"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	// PAYMENT SERVICE
 	paymentRepository := postgres.NewPaymentRepo(db)
 	paymentService := service.NewPaymentService(paymentRepository, fraudClient)
 	paymentHandler := http.NewPaymentHTTP(paymentService)
