@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"hexabank/internal/observability/metrics"
 	"hexabank/internal/observability/tracing"
 	fraudclient "hexabank/services/payment/adapters/fraud-client"
 	"hexabank/services/payment/adapters/http"
@@ -32,6 +33,9 @@ func main() {
 			log.Fatalf("Failed to shut down tracer: %v", err)
 		}
 	}()
+
+	// METRICS
+	metrics.NewtMetricsEndpoint()
 
 	// FRAUD CLIENT
 	fraudClient, err := fraudclient.NewFraudClient(os.Getenv("FRAUD_SERVICE_ADDRESS"))

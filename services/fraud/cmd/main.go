@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"hexabank/api/proto/fraud"
+	"hexabank/internal/observability/metrics"
 	"hexabank/internal/observability/tracing"
 	"hexabank/services/fraud/adapters/grpc"
 	"hexabank/services/fraud/domain/service"
@@ -23,11 +24,15 @@ func main() {
 		}
 	}()
 
+	// METRICS
+	metrics.NewtMetricsEndpoint()
+
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	// GRPC SERVER
 	server := g.NewServer(
 		g.StatsHandler(otelgrpc.NewServerHandler()),
 	)

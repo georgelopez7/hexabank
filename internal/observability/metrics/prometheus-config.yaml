@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "payment"
+    static_configs:
+      - targets: ["payment:2114"]
+
+  - job_name: "fraud"
+    static_configs:
+      - targets: ["fraud:2112"]
