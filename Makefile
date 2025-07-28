@@ -28,3 +28,17 @@ PROTO_PATH = "api/proto/$(SERVICE)/$(SERVICE).proto"
 # Example: "make gen-protobufs SERVICE=fraud"
 gen-protobufs:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative $(PROTO_PATH)
+
+# -----
+# ⚡️ TESTS
+
+## Runs all the tests
+# Example: "make test"
+test:
+	go test ./...
+
+## Runs tests for a particular microservice
+# Example: "make test-microservice SERVICE=payment"
+SERVICE ?= "payment"
+test-microservice:
+	go test ./services/$(SERVICE)/...
