@@ -16,25 +16,24 @@ import (
 type PaymentService struct {
 	paymentRepo port.PaymentRepository
 	fraudClient port.FraudClient
+	tracer      trace.Tracer
 }
 
 func NewPaymentService(paymentRepo port.PaymentRepository, fraudClient port.FraudClient) *PaymentService {
 	return &PaymentService{
 		paymentRepo: paymentRepo,
 		fraudClient: fraudClient,
+		tracer:      otel.Tracer("payment-service"),
 	}
 }
 
 func (s *PaymentService) CreatePayment(ctx context.Context, description string, amount int) (*model.Payment, error) {
-	tracer := otel.Tracer("payment-service/create-payment")
-
 	payment := model.NewPayment(description, amount)
-
 	paymentID := payment.ID
-	amount = payment.Amount
 
-	ctx, span := tracer.Start(ctx, "create-payment", trace.WithAttributes(
+	ctx, span := s.tracer.Start(ctx, "span-create-payment", trace.WithAttributes(
 		attribute.String("payment.id", paymentID.String()),
+		attribute.String("payment.description", description),
 		attribute.Int("payment.amount", amount),
 	))
 	defer span.End()

@@ -36,7 +36,8 @@ func main() {
 	server := g.NewServer(
 		g.StatsHandler(otelgrpc.NewServerHandler()),
 	)
-	fraudService := &service.FraudService{}
+
+	fraudService := service.NewFraudService()
 	fraudGRPC := grpc.NewFraudGRPC(fraudService)
 	fraud.RegisterFraudServiceServer(server, fraudGRPC)
 
