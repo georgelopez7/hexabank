@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"hexabank/internal/errors"
 	"hexabank/services/payment/domain/model"
@@ -14,16 +15,19 @@ import (
 )
 
 type PaymentService struct {
-	paymentRepo port.PaymentRepository
-	fraudClient port.FraudClient
-	tracer      trace.Tracer
+	paymentRepo   port.PaymentRepository
+	fraudClient   port.FraudClient
+	kafkaProducer port.NotificationProducer
+	tracer        trace.Tracer
 }
 
-func NewPaymentService(paymentRepo port.PaymentRepository, fraudClient port.FraudClient) *PaymentService {
+func NewPaymentService(paymentRepo port.PaymentRepository, fraudClient port.FraudClient,
+	kafkaProducer port.NotificationProducer) *PaymentService {
 	return &PaymentService{
-		paymentRepo: paymentRepo,
-		fraudClient: fraudClient,
-		tracer:      otel.Tracer("payment-service"),
+		paymentRepo:   paymentRepo,
+		fraudClient:   fraudClient,
+		kafkaProducer: kafkaProducer,
+		tracer:        otel.Tracer("payment-service"),
 	}
 }
 
@@ -47,7 +51,18 @@ func (s *PaymentService) CreatePayment(ctx context.Context, description string, 
 		return nil, errors.BadRequest
 	}
 
-	return payment, s.paymentRepo.CreatePayment(ctx, payment)
+	err = s.paymentRepo.CreatePayment(ctx, payment)
+	if err != nil {
+		return nil, errors.InternalError
+	}
+
+	message := fmt.Sprintf("Payment created: %s\nDescription: %s\nAmount: %d", paymentID.String(), payment.Description, payment.Amount)
+	err = s.kafkaProducer.Send(message)
+	if err != nil {
+		return nil, errors.InternalError
+	}
+
+	return payment, nil
 }
 
 func (s *PaymentService) GetPayment(ctx context.Context, id uuid.UUID) (*model.Payment, error) {

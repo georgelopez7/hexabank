@@ -10,6 +10,7 @@ import (
 	"hexabank/internal/observability/tracing"
 	fraudclient "hexabank/services/payment/adapters/fraud-client"
 	"hexabank/services/payment/adapters/http"
+	"hexabank/services/payment/adapters/kafka"
 	"hexabank/services/payment/adapters/postgres"
 	"hexabank/services/payment/domain/service"
 
@@ -43,9 +44,17 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// KAFKA PRODUCER
+	kafkaBrokers := []string{os.Getenv("KAFKA_BROKER_ADDRESS")}
+	kafkaTopic := "notifications"
+	notificationProducer, err := kafka.NewNotificationProducer(kafkaBrokers, kafkaTopic)
+	if err != nil {
+		log.Fatalf("Failed to create Kafka producer: %v", err)
+	}
+
 	// PAYMENT SERVICE
 	paymentRepository := postgres.NewPaymentRepo(db)
-	paymentService := service.NewPaymentService(paymentRepository, fraudClient)
+	paymentService := service.NewPaymentService(paymentRepository, fraudClient, notificationProducer)
 	paymentHandler := http.NewPaymentHTTP(paymentService)
 
 	r := gin.Default()

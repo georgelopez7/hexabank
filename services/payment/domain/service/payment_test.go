@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	fraudclient "hexabank/services/payment/adapters/fraud-client"
+	"hexabank/services/payment/adapters/kafka"
 	"hexabank/services/payment/adapters/postgres"
 	"hexabank/services/payment/domain/model"
 
@@ -15,11 +16,15 @@ import (
 )
 
 func Test_PaymentService_CreatePayment(t *testing.T) {
-	t.Run("should create payment successfully", func(t *testing.T) {
-		mockPaymentRepo := new(postgres.MockPaymentRepo)
-		mockFraudClient := new(fraudclient.MockFraudClient)
-		paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient)
+	// MOCKS
+	mockPaymentRepo := new(postgres.MockPaymentRepo)
+	mockFraudClient := new(fraudclient.MockFraudClient)
+	mockKafkaProducer := new(kafka.MockKafkaProducer)
 
+	// PAYMENT SERVICE
+	paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient, mockKafkaProducer)
+
+	t.Run("should create payment successfully", func(t *testing.T) {
 		description := "test payment"
 		amount := 100
 
@@ -37,10 +42,6 @@ func Test_PaymentService_CreatePayment(t *testing.T) {
 	})
 
 	t.Run("should return error when fraud is detected", func(t *testing.T) {
-		mockPaymentRepo := new(postgres.MockPaymentRepo)
-		mockFraudClient := new(fraudclient.MockFraudClient)
-		paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient)
-
 		description := "fraudulent payment"
 		amount := 200
 
@@ -55,10 +56,6 @@ func Test_PaymentService_CreatePayment(t *testing.T) {
 	})
 
 	t.Run("should return error when fraud check fails", func(t *testing.T) {
-		mockPaymentRepo := new(postgres.MockPaymentRepo)
-		mockFraudClient := new(fraudclient.MockFraudClient)
-		paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient)
-
 		description := "payment with error"
 		amount := 300
 
@@ -74,11 +71,15 @@ func Test_PaymentService_CreatePayment(t *testing.T) {
 }
 
 func Test_PaymentService_GetPayment(t *testing.T) {
-	t.Run("should get payment successfully", func(t *testing.T) {
-		mockPaymentRepo := new(postgres.MockPaymentRepo)
-		mockFraudClient := new(fraudclient.MockFraudClient)
-		paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient)
+	// MOCKS
+	mockPaymentRepo := new(postgres.MockPaymentRepo)
+	mockFraudClient := new(fraudclient.MockFraudClient)
+	mockKafkaProducer := new(kafka.MockKafkaProducer)
 
+	// PAYMENT SERVICE
+	paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient, mockKafkaProducer)
+
+	t.Run("should get payment successfully", func(t *testing.T) {
 		paymentID := uuid.New()
 		payment := &model.Payment{ID: paymentID, Description: "test payment", Amount: 100}
 
@@ -93,10 +94,6 @@ func Test_PaymentService_GetPayment(t *testing.T) {
 	})
 
 	t.Run("should return error when payment not found", func(t *testing.T) {
-		mockPaymentRepo := new(postgres.MockPaymentRepo)
-		mockFraudClient := new(fraudclient.MockFraudClient)
-		paymentService := NewPaymentService(mockPaymentRepo, mockFraudClient)
-
 		paymentID := uuid.New()
 
 		mockPaymentRepo.On("GetPayment", mock.Anything, paymentID).Return(nil, errors.New("payment not found"))

@@ -29,3 +29,5 @@ scrape_configs:
           ["__meta_docker_container_label_com_docker_compose_service"]
         regex: "promtail"
         action: drop
+      - target_label: "container"
+        replacement: "unknown"
